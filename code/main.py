@@ -228,9 +228,13 @@ pygame.time.set_timer(fly_animation_timer, 200)
 while True:
 
     for event in pygame.event.get():
-        if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
+        if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:  # Check if the pressed key is ESCAPE
+                pygame.quit()
+                exit()
         if game_active:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if player_rect.collidepoint(event.pos):
@@ -242,9 +246,7 @@ while True:
                 start_time = pygame.time.get_ticks()
         if game_active:
             if event.type == obstacle_timer:
-                obstacle_group.add(Obstacle(choice(['fly','spikes','cactus'])))
-
-
+                obstacle_group.add(Obstacle(choice(['fly', 'spikes', 'cactus'])))
 
             if event.type == fly_animation_timer:
                 if fly_frame_index == 0:
@@ -318,7 +320,7 @@ while True:
     if score > 0 and score % 10 == 0:
         game_speed += 0.01  # Increase game speed by 0.01 when score is a multiple of 10
         background_speed += 0.01
-        print(game_speed)
+        #print(game_speed)
 
 
     pygame.display.update()
