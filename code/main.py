@@ -81,6 +81,19 @@ class Obstacle(pygame.sprite.Sprite):
             self.kill()
 
 
+def check_high_score(current_score):
+    try:
+        with open('score.txt', 'r') as file:
+            high_score = int(file.read())
+    except FileNotFoundError:
+        high_score = 0
+
+    if current_score > high_score:
+        with open('score.txt', 'w') as file:
+            file.write(str(current_score))
+        return current_score
+    return high_score
+
 def display_score():
     current_time = int((pygame.time.get_ticks() - start_time) // 1000)
     score_surf = test_font.render(f'Score:{current_time}', False, 'Orange')
@@ -169,7 +182,8 @@ gameover_text_instructions = test_font.render('press up arrow to start', False, 
 gameover_text_instructions_rect = gameover_text_instructions.get_rect(center=(400, 290))
 gameover_title = test_font.render('Dino run', False, 'Lime').convert_alpha()
 gameover_title_rect = gameover_title.get_rect(center=(400, 50))
-#high_score_text = test_font.render()
+
+
 
 # obstacles
 spikes_surf = pygame.image.load('code/resources/object 2.png').convert_alpha()
@@ -257,26 +271,34 @@ while True:
         # collison
         game_active = collision_sprite()
 
-    else:
+
+    else:  # This is the part of the code where game_active is False
+
         window.fill('orange')
         obstacle_rect_list.clear()
         player_rect.midbottom = (80, 336)
         player_gravity = 0
         window.blit(gameover_dino_scaled, gameover_dino_rect)
         window.blit(gameover_title, gameover_title_rect)
+        high_score = check_high_score(score)  # Check and update the high score
         score_message = test_font.render(f'Score: {score}', False, 'Black')
         score_message_rect = score_message.get_rect(center=(400, 300))
+        high_score_message = test_font.render(f'High Score: {high_score}', False, 'Black')  # Display high score
+        high_score_message_rect = high_score_message.get_rect(center=(400, 350))  # Adjust Y coordinate for spacing
         game_speed = 5
-
 
         if score == 0:
             window.blit(gameover_text_instructions, gameover_text_instructions_rect)
+
+            window.blit(high_score_message, high_score_message_rect)  # Blit the high score
+
         else:
             window.blit(score_message, score_message_rect)
+            window.blit(high_score_message, high_score_message_rect)  # Blit the high score
 
     if score > 0 and score % 10 == 0:
         game_speed += 0.01  # Increase game speed by 0.01 when score is a multiple of 10
-        print(game_speed)
+        #print(game_speed)
 
     pygame.display.update()
     clock.tick(60)
