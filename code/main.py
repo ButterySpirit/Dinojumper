@@ -130,7 +130,7 @@ def obstacle_movement(obstacle_list, game_speed):
 
 
 game_speed = 5
-
+background_speed=5
 def collisons(player, obstacles):
     if obstacles:
         for obstacle_rect in obstacles:
@@ -182,6 +182,16 @@ gameover_text_instructions = test_font.render('press up arrow to start', False, 
 gameover_text_instructions_rect = gameover_text_instructions.get_rect(center=(400, 290))
 gameover_title = test_font.render('Dino run', False, 'Lime').convert_alpha()
 gameover_title_rect = gameover_title.get_rect(center=(400, 50))
+
+background_surf = pygame.image.load('code/resources/dinobackground2.png').convert()  # Convert speeds up blitting
+background_rect = background_surf.get_rect(topleft=(0, 0))
+# If your background is smaller than the screen, use two side by side
+background_surf2 = pygame.image.load('code/resources/dinobackground2.png').convert()
+background_rect2 = background_surf2.get_rect(topleft=(background_rect.width, 0))
+# Loading the third background
+background_surf3 = pygame.image.load('code/resources/dinobackground2.png').convert()
+background_rect3 = background_surf3.get_rect(topleft=(background_rect2.width + background_rect2.left, 0))
+
 
 
 
@@ -244,31 +254,39 @@ while True:
                 fly_surf = fly_frames[fly_frame_index]
 
     if game_active:
+        # Clear the window first
         window.fill('Black')
+
+        # Scroll and redraw the background
+        background_rect.x -= background_speed
+        background_rect2.x -= background_speed
+        if background_rect.right < 0:
+            background_rect.left = background_rect2.right
+        if background_rect2.right < 0:
+            background_rect2.left = background_rect.right
+        if background_rect3.right < 0:
+            background_rect3.left = background_rect2.right
+
+        window.blit(background_surf, background_rect)
+        window.blit(background_surf2, background_rect2)
+        window.blit(background_surf3, background_rect3)
+
+        # Draw the floor after the background
         for a in range(0, 13):
             window.blit(floor1, (a * 64, 336))
+
+        # Update the score and display it
         score = display_score()
 
-        display_score()
-
-        keys = pygame.key.get_pressed()
-
-        player.draw(window)
+        # Process player input and update player
         player.update()
+        player.draw(window)
+
+        # Update and draw obstacles
         obstacle_group.update()
-
-        # Call the obstacle_movement function and update obstacle_group with the result
-        obstacle_group = pygame.sprite.Group(*obstacle_movement(obstacle_group.sprites(), game_speed))
-
         obstacle_group.draw(window)
 
-
-
-        if player_rect.bottom == 336:
-
-            if keys[pygame.K_UP]:
-                player_gravity = -20
-        # collison
+        # Check collisions between the player and obstacles
         game_active = collision_sprite()
 
 
@@ -286,6 +304,7 @@ while True:
         high_score_message = test_font.render(f'High Score: {high_score}', False, 'Black')  # Display high score
         high_score_message_rect = high_score_message.get_rect(center=(400, 350))  # Adjust Y coordinate for spacing
         game_speed = 5
+        background_speed = 5
 
         if score == 0:
             window.blit(gameover_text_instructions, gameover_text_instructions_rect)
@@ -298,7 +317,9 @@ while True:
 
     if score > 0 and score % 10 == 0:
         game_speed += 0.01  # Increase game speed by 0.01 when score is a multiple of 10
-        #print(game_speed)
+        background_speed += 0.01
+        print(game_speed)
+
 
     pygame.display.update()
     clock.tick(60)
